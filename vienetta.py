@@ -4,7 +4,18 @@ import string
 
 import cherrypy
 from ws4py.server.cherrypyserver import WebSocketPlugin, WebSocketTool
-from ws4py.websocket import EchoWebSocket
+from ws4py.websocket import WebSocket
+
+class MyWebSocket(WebSocket):
+    def opened(self):
+        self.send("hello and welcome to the thunderdome", False)
+        
+    def received_message(self, message):
+        """
+        Automatically sends back the provided ``message`` to
+        its originating endpoint.
+        """
+        self.send(message.data, message.is_binary)
 
 WebSocketPlugin(cherrypy.engine).subscribe()
 cherrypy.tools.websocket = WebSocketTool()
@@ -42,7 +53,7 @@ if __name__ == '__main__':
         },
         '/ws': {
             'tools.websocket.on': True,
-            'tools.websocket.handler_cls': EchoWebSocket
+            'tools.websocket.handler_cls': MyWebSocket
         }
     }
     cherrypy.quickstart(HelloWorld(), '/', conf)
